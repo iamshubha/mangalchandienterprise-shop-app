@@ -16,6 +16,8 @@ class _MyApp extends StatefulWidget {
 
 class _MyAppState extends State<_MyApp> {
   ScanResult scanResult;
+final TextEditingController _weight = TextEditingController();
+final _price = TextEditingController();
 
   final _flashOnController = TextEditingController(text: "Flash on");
   final _flashOffController = TextEditingController(text: "Flash off");
@@ -50,67 +52,49 @@ class _MyAppState extends State<_MyApp> {
           child: Column(
             children: <Widget>[
               ListTile(
-                title: Text("Result Type"),
-                subtitle: Text(scanResult.type?.toString() ?? ""),
-              ),
-              ListTile(
                 title: Text("Raw Content"),
                 subtitle: Text(scanResult.rawContent ?? ""),
               ),
-              ListTile(
-                title: Text("Format"),
-                subtitle: Text(scanResult.format?.toString() ?? ""),
+              Container(
+                padding: EdgeInsets.all(10),
+                child: TextFormField(
+                
+                  controller: _weight,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Weight',
+                  ),
+                ),
               ),
-              ListTile(
-                title: Text("Format note"),
-                subtitle: Text(scanResult.formatNote ?? ""),
+              Container(
+                padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                child: TextField(
+                  keyboardType: TextInputType.number,
+                  controller: _price,
+                  onChanged: (value) {
+                   print(value);
+                  },
+
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Price',
+                  ),
+                ),
+              ),
+              Center(
+                child: FlatButton(
+                  onPressed: () {
+                    print("$_price" + "dfsgfdsgfsdfgdsgdsgfsdgfsdgfdsgdsgfdsgfds"+ "$_weight");
+                  },
+                  child: Text("fgvkdl "),
+                  color: Colors.cyan[300],
+                ),
               ),
             ],
           ),
         ),
-      ListTile(
-        title: Text("Camera selection"),
-        dense: true,
-        enabled: false,
-      ),
     ];
-
-    if (Platform.isAndroid) {
-      contentList.addAll([
-        ListTile(
-          title: Text("Android specific options"),
-          dense: true,
-          enabled: false,
-        ),
-        // ListTile(
-        //   title:
-        //       Text("Aspect tolerance (${_aspectTolerance.toStringAsFixed(2)})"),
-        //   subtitle: Slider(
-        //     min: -1.0,
-        //     max: 1.0,
-        //     value: _aspectTolerance,
-        //     onChanged: (value) {
-        //       setState(() {
-        //         _aspectTolerance = value;
-        //       });
-        //     },
-        //   ),
-        // ),
-      
-      ]);
-    }
-
-    contentList.addAll([
-      CheckboxListTile(
-        title: Text("Start with flash"),
-        value: _autoEnableFlash,
-        onChanged: (checked) {
-          setState(() {
-            _autoEnableFlash = checked;
-          });
-        },
-      )
-    ]);
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,

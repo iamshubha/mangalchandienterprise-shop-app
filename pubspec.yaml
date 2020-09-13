@@ -32,7 +32,8 @@ dependencies:
   firebase_auth: ^0.16.0
   google_sign_in: ^4.4.4
   cloud_firestore: ^0.13.7
-  
+  velocity_x: ^0.4.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

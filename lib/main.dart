@@ -4,6 +4,7 @@ import 'package:barcode_scan/barcode_scan.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:velocity_x/velocity_x.dart';
 
 void main() {
   runApp(_MyApp());
@@ -18,6 +19,7 @@ class _MyAppState extends State<_MyApp> {
   ScanResult scanResult;
   final TextEditingController _weight = TextEditingController();
   final _price = TextEditingController();
+  final _doc = TextEditingController();
 
   final _flashOnController = TextEditingController(text: "Flash on");
   final _flashOffController = TextEditingController(text: "Flash off");
@@ -44,6 +46,9 @@ class _MyAppState extends State<_MyApp> {
     });
   }
 
+  List<int> _phoneWidgets = [];
+  int finalsum = 0;
+  int arrint;
   @override
   Widget build(BuildContext context) {
     var contentList = <Widget>[
@@ -52,7 +57,12 @@ class _MyAppState extends State<_MyApp> {
           child: Column(
             children: <Widget>[
               ListTile(
-                title: Text("Raw Content"),
+                trailing: IconButton(
+                  icon: Icon(Icons.camera),
+                  tooltip: "Scan",
+                  onPressed: scan,
+                ),
+                title: Text("Docket No -"),
                 subtitle: Text(scanResult.rawContent ?? ""),
               ),
               Container(
@@ -71,32 +81,52 @@ class _MyAppState extends State<_MyApp> {
                 child: TextField(
                   keyboardType: TextInputType.number,
                   controller: _price,
-                  onChanged: (value) {
-                    print(value);
-                  },
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
                     labelText: 'Price',
                   ),
                 ),
               ),
-              Center(
-                child: FlatButton(
-                  onPressed: () {
-                    updateUserDetails(
-                      "${scanResult.rawContent}",
-                      "${_weight.text}",
-                      "${_price.text}",
-                    );
-                    
-                  },
-                  child: Text("fgvkdl "),
-                  color: Colors.cyan[300],
-                ),
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              //   children: <Widget>[
+              // FlatButton(
+              //   onPressed: () {},
+              //   child: Text("Add"),
+              //   color: Colors.cyan[300],
+              // ),
+              FlatButton(
+                onPressed: () {
+                  updateUserDetails(
+                    "${scanResult.rawContent}",
+                    "${_weight.text}",
+                    "${_price.text}",
+                  );
+                  setState(() {
+                    arrint = int.parse(_price.text);
+                    finalsum = finalsum + arrint;
+                  });
+                  _phoneWidgets.add(arrint);
+
+                  _weight.clear();
+                  _price.clear();
+                  setState(() {
+                    // ignore: unnecessary_statements
+                    scanResult == null;
+                  });
+                },
+                child: Text("Save"),
+                color: Colors.cyan[300],
               ),
+              // ],
+              // ),
             ],
           ),
         ),
+      "$_phoneWidgets".text.xl3.make(),
+      "Total packet = ${_phoneWidgets.length}".text.xl3.make(),
+      "Total Price = $finalsum".text.xl3.make()
+      //  Text("$_phoneWidgets",)
     ];
 
     return MaterialApp(
@@ -124,61 +154,17 @@ class _MyAppState extends State<_MyApp> {
   final CollectionReference userCollection =
       Firestore.instance.collection('Users');
   Future updateUserDetails(String uid, String price, String weight) async {
-    dynamic message;
-
-    // final a = await userCollection
-    //     .document(uid)
-    //     .updateData({
-    //       'DocNumber': uid,
-    //       'Price': price.toString(),
-    //       'Weight': weight.toString(),
-    //     })
-    //     .whenComplete(() => message = "Success")
-    //     .catchError((error) => message = error);
     await Firestore.instance
-        .collection("books")
+        .collection("Docket-Collection")
         .document(uid)
         .setData({
-          'DocNumber': uid,
-          'Price': price.toString(),
-          'Weight': weight.toString(),
-        })
-        // .whenComplete(() => message = 'Success')
-        // .catchError((error) => message = error)
-        ;
-    // await userCollection
-    //     .document(uid)
-    //     .collection('task')
-    //     .document('ds.documentID')
-    //     .updateData({
-    //       'DocNumber': uid,
-    //       'Price': price.toString(),
-    //       'Weight': weight.toString(),
-    // });
-    // await userCollection
-    //     .document(uid)
-    //     .updateData({
-    //       'DocNumber': uid,
-    //       'Price': price.toString(),
-    //       'Weight': weight.toString(),
-    //     })
-    //     .whenComplete(() => message = 'Success')
-    //     .catchError((error) => message = error);
+      'DocNumber': uid,
+      'Price': price.toString(),
+      'Weight': weight.toString(),
+      'time': DateTime.now()
+    });
 
     return "true";
-  }
-
-  void createRecord() async {
-    await Firestore.instance.collection("books").document("1").setData({
-      'title': 'Mastering Flutter',
-      'description': 'Programming Guide for Dart'
-    });
-
-    DocumentReference ref = await Firestore.instance.collection("books").add({
-      'title': 'Flutter in Action',
-      'description': 'Complete Programming Guide to learn Flutter'
-    });
-    print(ref.documentID);
   }
 
   Future scan() async {
@@ -209,7 +195,6 @@ class _MyAppState extends State<_MyApp> {
         type: ResultType.Error,
         format: BarcodeFormat.unknown,
       );
-
       if (e.code == BarcodeScanner.cameraAccessDenied) {
         setState(() {
           result.rawContent = 'The user did not grant the camera permission!';
@@ -222,5 +207,6 @@ class _MyAppState extends State<_MyApp> {
       });
     }
   }
+
   String rs;
 }

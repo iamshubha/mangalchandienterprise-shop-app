@@ -8,17 +8,18 @@ import 'package:velocity_x/velocity_x.dart';
 
 class MyApp extends StatefulWidget {
   MyApp({this.name});
-  var name;
+  final String name;
   @override
   MyAppState createState() => MyAppState();
 }
 
 class MyAppState extends State<MyApp> {
+  bool bal = false;
   ScanResult scanResult;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _weight = TextEditingController();
   final _price = TextEditingController();
   final _doc = TextEditingController();
-
   final _flashOnController = TextEditingController(text: "Flash on");
   final _flashOffController = TextEditingController(text: "Flash off");
   final _cancelController = TextEditingController(text: "Cancel");
@@ -36,7 +37,6 @@ class MyAppState extends State<MyApp> {
   @override
   initState() {
     super.initState();
-
     Future.delayed(Duration.zero, () async {
       _numberOfCameras = await BarcodeScanner.numberOfCameras;
       setState(() {});
@@ -51,66 +51,91 @@ class MyAppState extends State<MyApp> {
     var contentList = <Widget>[
       if (scanResult != null)
         Card(
-          child: Column(
-            children: <Widget>[
-              ListTile(
-                trailing: IconButton(
-                  icon: Icon(Icons.camera),
-                  tooltip: "Scan",
-                  onPressed: scan,
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: <Widget>[
+                ListTile(
+                  trailing: IconButton(
+                    icon: Icon(Icons.camera),
+                    tooltip: "Scan",
+                    onPressed: scan,
+                  ),
+                  title: Text("Docket No -"),
+                  subtitle: Text(scanResult.rawContent ?? ""),
                 ),
-                title: Text("Docket No -"),
-                subtitle: Text(scanResult.rawContent ?? ""),
-              ),
-              Container(
-                padding: EdgeInsets.all(10),
-                child: TextFormField(
-                  controller: _weight,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Weight',
+                Container(
+                  padding: EdgeInsets.all(10),
+                  child: TextFormField(
+                    controller: _weight,
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value.isEmpty) {
+                        return 'Please enter Weight';
+                      }
+                      return null;
+                    },
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Weight',
+                    ),
                   ),
                 ),
-              ),
-              Container(
-                padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
-                child: TextField(
-                  keyboardType: TextInputType.number,
-                  controller: _price,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Price',
+                Container(
+                  padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                  child: TextFormField(
+                    keyboardType: TextInputType.number,
+                    controller: _price,
+                    validator: (value) {
+                      if (value.isEmpty) {
+                        return 'Please enter Price';
+                      }
+                      return null;
+                    },
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Price',
+                    ),
                   ),
                 ),
-              ),
+                bal == false
+                    ? Container(
+                        child: scanResult.rawContent != null
+                            ? FlatButton(
+                                onPressed: () {
+                                  bal = true;
+                                  if (_formKey.currentState.validate()) {
+                                    updateUserDetails(
+                                      "${scanResult.rawContent}",
+                                      "${_weight.text}",
+                                      "${_price.text}",
+                                    );
+                                    setState(() {
+                                      scanResult.rawContent = null;
+                                      arrint = int.parse(_price.text);
+                                      finalsum = finalsum + arrint;
+                                    });
+                                    _phoneWidgets.add(arrint);
 
-              FlatButton(
-                onPressed: () {
-                  updateUserDetails(
-                    "${scanResult.rawContent}",
-                    "${_weight.text}",
-                    "${_price.text}",
-                  );
-                  setState(() {
-                    arrint = int.parse(_price.text);
-                    finalsum = finalsum + arrint;
-                  });
-                  _phoneWidgets.add(arrint);
-
-                  _weight.clear();
-                  _price.clear();
-                  setState(() {
-                    // ignore: unnecessary_statements
-                    scanResult == null;
-                  });
-                },
-                child: Text("Save"),
-                color: Colors.cyan[300],
-              ),
-              // ],
-              // ),
-            ],
+                                    _weight.clear();
+                                    _price.clear();
+                                    setState(() {
+                                      // ignore: unnecessary_statements
+                                      scanResult == null;
+                                      bal = false;
+                                    });
+                                  }
+                                },
+                                child: Text("Save"),
+                                color: Colors.cyan[300],
+                              )
+                            : Container(),
+                      )
+                    : CircularProgressIndicator(),
+                // ],
+                // ),
+              ],
+            ),
           ),
         ),
       "$_phoneWidgets".text.xl3.make(),
@@ -122,7 +147,7 @@ class MyAppState extends State<MyApp> {
     return Container(
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Maa mangal chandi'),
+          title: Text('Scanner'),
           centerTitle: true,
           actions: <Widget>[
             IconButton(
@@ -139,23 +164,25 @@ class MyAppState extends State<MyApp> {
         ),
       ),
     );
-  }         
+  }
+
+  String abal =
+      "${DateTime.now().day}-${DateTime.now().month}-${DateTime.now().year}";
+
   final CollectionReference userCollection =
       Firestore.instance.collection('Users');
   Future updateUserDetails(String uid, String price, String weight) async {
-    await Firestore.instance
-        .collection("Docket-Collection")
-        .document(uid)
-        .setData({
+    await Firestore.instance.collection("$abal").document(uid).setData({
       'Name': widget.name,
-      'DocNumber': uid,
+      'AWB Number': uid,
       'Price': price.toString(),
       'Weight': weight.toString(),
-      'time': DateTime.now()
+      'Time': DateTime.now()
     });
 
     return "true";
   }
+
   Future scan() async {
     try {
       var options = ScanOptions(
@@ -196,5 +223,6 @@ class MyAppState extends State<MyApp> {
       });
     }
   }
+
   String rs;
 }

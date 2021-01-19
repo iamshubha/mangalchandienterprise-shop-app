@@ -4,6 +4,7 @@ import 'dart:io' show Platform;
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 class MyApp extends StatefulWidget {
@@ -15,6 +16,7 @@ class MyApp extends StatefulWidget {
 
 class MyAppState extends State<MyApp> {
   bool bal = false;
+  int _wVal = 4;
   ScanResult scanResult;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _weight = TextEditingController();
@@ -98,40 +100,97 @@ class MyAppState extends State<MyApp> {
                     ),
                   ),
                 ),
-                bal == false
-                    ? Container(
-                        child: scanResult.rawContent != null
-                            ? FlatButton(
-                                onPressed: () {
-                                  bal = true;
-                                  if (_formKey.currentState.validate()) {
-                                    updateUserDetails(
-                                      "${scanResult.rawContent}",
-                                      "${_weight.text}",
-                                      "${_price.text}",
-                                    );
-                                    setState(() {
-                                      scanResult.rawContent = null;
-                                      arrint = int.parse(_price.text);
-                                      finalsum = finalsum + arrint;
-                                    });
-                                    _phoneWidgets.add(arrint);
-
-                                    _weight.clear();
-                                    _price.clear();
-                                    setState(() {
-                                      // ignore: unnecessary_statements
-                                      scanResult == null;
-                                      bal = false;
-                                    });
-                                  }
-                                },
-                                child: Text("Save"),
-                                color: Colors.cyan[300],
-                              )
-                            : Container(),
+                Container(
+                  child: Row(
+                    // mainAxisAlignment: Main,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      InkWell(
+                        onTap: () {
+                          setState(() {
+                            _wVal = 2;
+                          });
+                        },
+                        child: Container(
+                          color: _wVal == 2 ? Colors.white : Colors.green[400],
+                          alignment: Alignment.center,
+                          height: 50,
+                          width: 80,
+                          child: "NorthEast".text.make(),
+                        ),
+                      ),
+                      InkWell(
+                        onTap: () {
+                          setState(() {
+                            _wVal = 0;
+                          });
+                        },
+                        child: Container(
+                          color: _wVal == 0 ? Colors.white : Colors.green[400],
+                          alignment: Alignment.center,
+                          height: 50,
+                          width: 80,
+                          child: "WB".text.make(),
+                        ),
+                      ),
+                      InkWell(
+                        onTap: () {
+                          setState(() {
+                            _wVal = 1;
+                          });
+                        },
+                        child: Container(
+                          color: _wVal == 1 ? Colors.white : Colors.green[400],
+                          alignment: Alignment.center,
+                          height: 50,
+                          width: 80,
+                          child: "Other".text.make(),
+                        ),
                       )
-                    : CircularProgressIndicator(),
+                    ],
+                  ),
+                ).p(20),
+
+                FlatButton(
+                  onPressed: () {
+                    // bal = true;
+                    if (_formKey.currentState.validate()) {
+                      if (_wVal != 4) {
+                        updateUserDetails(
+                          "${scanResult.rawContent}",
+                          "${_weight.text}",
+                          "${_price.text}",
+                        );
+                        setState(() {
+                          scanResult.rawContent = null;
+                          arrint = int.parse(_price.text);
+                          finalsum = finalsum + arrint;
+                        });
+                        _phoneWidgets.add(arrint);
+                        _weight.clear();
+                        _price.clear();
+                        setState(() {
+                          _wVal = 4;
+                          // ignore: unnecessary_statements
+                          scanResult == null;
+                          bal = false;
+                        });
+                      } else {
+                        Fluttertoast.showToast(
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.BOTTOM,
+                            timeInSecForIosWeb: 1,
+                            backgroundColor: Colors.cyan,
+                            textColor: Colors.white,
+                            fontSize: 16.0,
+                            msg: 'Please Select Area');
+                      }
+                    }
+                  },
+                  child: Text("Save"),
+                  color: Colors.cyan[300],
+                )
+
                 // ],
                 // ),
               ],
@@ -177,6 +236,7 @@ class MyAppState extends State<MyApp> {
       'AWB Number': uid,
       'Price': price.toString(),
       'Weight': weight.toString(),
+      'Area': _wVal.toString(),
       'Time': DateTime.now()
     });
 

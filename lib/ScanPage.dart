@@ -20,7 +20,7 @@ class MyAppState extends State<MyApp> {
   ScanResult scanResult;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _weight = TextEditingController();
-  final _price = TextEditingController();
+  // final _price = TextEditingController();
   final _doc = TextEditingController();
   final _flashOnController = TextEditingController(text: "Flash on");
   final _flashOffController = TextEditingController(text: "Flash off");
@@ -83,23 +83,23 @@ class MyAppState extends State<MyApp> {
                     ),
                   ),
                 ),
-                Container(
-                  padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
-                  child: TextFormField(
-                    keyboardType: TextInputType.number,
-                    controller: _price,
-                    validator: (value) {
-                      if (value.isEmpty) {
-                        return 'Please enter Price';
-                      }
-                      return null;
-                    },
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Price',
-                    ),
-                  ),
-                ),
+                // Container(
+                //   padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                //   child: TextFormField(
+                //     keyboardType: TextInputType.number,
+                //     controller: _price,
+                //     validator: (value) {
+                //       if (value.isEmpty) {
+                //         return 'Please enter Price';
+                //       }
+                //       return null;
+                //     },
+                //     decoration: InputDecoration(
+                //       border: OutlineInputBorder(),
+                //       labelText: 'Price',
+                //     ),
+                //   ),
+                // ),
                 Container(
                   child: Row(
                     // mainAxisAlignment: Main,
@@ -159,17 +159,16 @@ class MyAppState extends State<MyApp> {
                         updateUserDetails(
                           "${scanResult.rawContent}",
                           "${_weight.text}",
-                          "${_price.text}",
+                         
                         );
                         setState(() {
                           scanResult.rawContent = null;
-                          arrint = int.parse(_price.text);
-                          finalsum = finalsum + arrint;
-                        });
-                        _phoneWidgets.add(arrint);
+                          // arrint = int.parse(_price.text);
+                          // finalsum = finalsum + arrint;
+                        
+                        // _phoeWidgets.add(arrint);
                         _weight.clear();
-                        _price.clear();
-                        setState(() {
+                       
                           _wVal = 4;
                           // ignore: unnecessary_statements
                           scanResult == null;
@@ -230,11 +229,10 @@ class MyAppState extends State<MyApp> {
 
   final CollectionReference userCollection =
       Firestore.instance.collection('Users');
-  Future updateUserDetails(String uid, String price, String weight) async {
+  Future updateUserDetails(String uid, String weight) async {
     await Firestore.instance.collection("$abal").document(uid).setData({
       'Name': widget.name,
       'AWB Number': uid,
-      'Price': price.toString(),
       'Weight': weight.toString(),
       'Area': _wVal.toString(),
       'Time': DateTime.now()

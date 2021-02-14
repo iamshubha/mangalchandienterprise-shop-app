@@ -8,6 +8,43 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:406578740065:android:400b1b450572be193ae320",
+        "android_client_info": {
+          "package_name": "com.example.webrtcApk"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "406578740065-lu643uve3g20pntr9i4qnnpg8sar4iri.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.webrtcApk",
+            "certificate_hash": "aacd5c4cf945172594b94e549cba4553369a1adb"
+          }
+        },
+        {
+          "client_id": "406578740065-21o8r9a4m27a61ua9cakcq64vtpiu5um.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBC15R1bXSwbhK0EyRD8j8ROChHGcjNQMM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "406578740065-21o8r9a4m27a61ua9cakcq64vtpiu5um.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:406578740065:android:ea46891fbb91705c3ae320",
         "android_client_info": {
           "package_name": "com.maamangalchandi.shop_app"
@@ -57,6 +94,14 @@
           "android_info": {
             "package_name": "com.maamangalchandienterprise.shopscanner",
             "certificate_hash": "cf625a5bfe9476d2ac7b4a454c9eaed789fd8670"
+          }
+        },
+        {
+          "client_id": "406578740065-bgpdemih6ahffcbnkbpe3l2m12s1vg18.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.maamangalchandienterprise.shopscanner",
+            "certificate_hash": "d29a167fe679d225c06204d24d54b15b9d3a39d0"
           }
         },
         {

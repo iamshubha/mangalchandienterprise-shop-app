@@ -29,7 +29,7 @@ class MyAppState extends State<MyApp> {
   var _numberOfCameras = 0;
   var _selectedCamera = -1;
   var _useAutoFocus = true;
-  var _autoEnableFlash = true;
+  var _autoEnableFlash = false;
 
   static final _possibleFormats = BarcodeFormat.values.toList()
     ..removeWhere((e) => e == BarcodeFormat.unknown);
@@ -159,16 +159,10 @@ class MyAppState extends State<MyApp> {
                         updateUserDetails(
                           "${scanResult.rawContent}",
                           "${_weight.text}",
-                         
                         );
                         setState(() {
                           scanResult.rawContent = null;
-                          // arrint = int.parse(_price.text);
-                          // finalsum = finalsum + arrint;
-                        
-                        // _phoeWidgets.add(arrint);
-                        _weight.clear();
-                       
+                          _weight.clear();
                           _wVal = 4;
                           // ignore: unnecessary_statements
                           scanResult == null;
@@ -196,9 +190,9 @@ class MyAppState extends State<MyApp> {
             ),
           ),
         ),
-      "$_phoneWidgets".text.xl3.make(),
-      "Total packet = ${_phoneWidgets.length}".text.xl3.make(),
-      "Total Price = $finalsum".text.xl3.make()
+      // "$_phoneWidgets".text.xl3.make(),
+      // "Total packet = ${_phoneWidgets.length}".text.xl3.make(),
+      // "Total Price = $finalsum".text.xl3.make()
       //  Text("$_phoneWidgets",)
     ];
 
@@ -224,19 +218,27 @@ class MyAppState extends State<MyApp> {
     );
   }
 
-  String abal =
-      "${DateTime.now().day}-${DateTime.now().month}-${DateTime.now().year}";
+  String abal = DateTime.now().toString().substring(0, 10);
+  String path = 'shubha';
+
+  // "${DateTime.now().day}-${DateTime.now().month}-${DateTime.now().year}";
 
   final CollectionReference userCollection =
       Firestore.instance.collection('Users');
   Future updateUserDetails(String uid, String weight) async {
-    await Firestore.instance.collection("$abal").document(uid).setData({
+    await Firestore.instance
+        .collection(path)
+        .document(abal)
+        .collection(uid)
+        .document(widget.name)
+        .setData({
       'Name': widget.name,
       'AWB Number': uid,
       'Weight': weight.toString(),
       'Area': _wVal.toString(),
       'Time': DateTime.now()
     });
+    // await Firestore.instance.collection(path).document().setData(data);
 
     return "true";
   }
@@ -262,8 +264,8 @@ class MyAppState extends State<MyApp> {
       print(result.rawContent);
       setState(() {
         rs = result.rawContent;
+        scanResult = result;
       });
-      setState(() => scanResult = result);
     } on PlatformException catch (e) {
       var result = ScanResult(
         type: ResultType.Error,

@@ -83,23 +83,6 @@ class MyAppState extends State<MyApp> {
                     ),
                   ),
                 ),
-                // Container(
-                //   padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
-                //   child: TextFormField(
-                //     keyboardType: TextInputType.number,
-                //     controller: _price,
-                //     validator: (value) {
-                //       if (value.isEmpty) {
-                //         return 'Please enter Price';
-                //       }
-                //       return null;
-                //     },
-                //     decoration: InputDecoration(
-                //       border: OutlineInputBorder(),
-                //       labelText: 'Price',
-                //     ),
-                //   ),
-                // ),
                 Container(
                   child: Row(
                     // mainAxisAlignment: Main,
@@ -153,31 +136,43 @@ class MyAppState extends State<MyApp> {
 
                 FlatButton(
                   onPressed: () {
-                    // bal = true;
-                    if (_formKey.currentState.validate()) {
-                      if (_wVal != 4) {
-                        updateUserDetails(
-                          "${scanResult.rawContent}",
-                          "${_weight.text}",
-                        );
-                        setState(() {
-                          scanResult.rawContent = null;
-                          _weight.clear();
-                          _wVal = 4;
-                          // ignore: unnecessary_statements
-                          scanResult == null;
-                          bal = false;
-                        });
-                      } else {
-                        Fluttertoast.showToast(
-                            toastLength: Toast.LENGTH_SHORT,
-                            gravity: ToastGravity.BOTTOM,
-                            timeInSecForIosWeb: 1,
-                            backgroundColor: Colors.cyan,
-                            textColor: Colors.white,
-                            fontSize: 16.0,
-                            msg: 'Please Select Area');
+                    if (scanResult.rawContent.length == 13) {
+                      if (_formKey.currentState.validate()) {
+                        if (_wVal != 4) {
+                          updateUserDetails(
+                            "${scanResult.rawContent}",
+                            "${_weight.text}",
+                          ).then((value) {
+                            setState(() {
+                              scanResult.rawContent = null;
+                              _weight.clear();
+                              _wVal = 4;
+                              scanResult = null;
+                              // ignore: unnecessary_statements
+                              scanResult == null;
+                              bal = false;
+                            });
+                          });
+                        } else {
+                          Fluttertoast.showToast(
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.BOTTOM,
+                              timeInSecForIosWeb: 1,
+                              backgroundColor: Colors.cyan,
+                              textColor: Colors.white,
+                              fontSize: 16.0,
+                              msg: 'Please Select Area');
+                        }
                       }
+                    } else {
+                      Fluttertoast.showToast(
+                          toastLength: Toast.LENGTH_SHORT,
+                          gravity: ToastGravity.BOTTOM,
+                          timeInSecForIosWeb: 1,
+                          backgroundColor: Colors.cyan,
+                          textColor: Colors.white,
+                          fontSize: 16.0,
+                          msg: 'AWB Invalid');
                     }
                   },
                   child: Text("Save"),
@@ -219,7 +214,7 @@ class MyAppState extends State<MyApp> {
   }
 
   String abal = DateTime.now().toString().substring(0, 10);
-  String path = 'shubha';
+  String path = 'bapan';
 
   // "${DateTime.now().day}-${DateTime.now().month}-${DateTime.now().year}";
 
@@ -235,7 +230,13 @@ class MyAppState extends State<MyApp> {
       'Name': widget.name,
       'AWB Number': uid,
       'Weight': weight.toString(),
-      'Area': _wVal.toString(),
+      'Area': _wVal == 2
+          ? "NorthEast"
+          : _wVal == 0
+              ? "WB"
+              : "Other",
+
+      //  _wVal.toString(),
       'Time': DateTime.now()
     });
     // await Firestore.instance.collection(path).document().setData(data);

@@ -1,17 +1,14 @@
-import 'dart:io' show Platform;
+// import 'dart:io' show Platform;
+import 'dart:convert';
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:shopscanner/ScanPage.dart';
 import 'package:velocity_x/velocity_x.dart';
-import 'package:flutter/material.dart';
 import 'dart:async';
-import 'dart:io' show Platform;
 import 'package:barcode_scan/barcode_scan.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:velocity_x/velocity_x.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(
@@ -83,11 +80,19 @@ class DocketWeight extends StatefulWidget {
 }
 
 class _DocketWeightState extends State<DocketWeight> {
+  String _waybill;
+  String _phone;
+  int _gm;
+  String _name;
+  String product_details;
+  String _add;
+  String commodity_value;
+
   bool bal = false;
   int _wVal = 4;
   ScanResult scanResult;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _weight = TextEditingController();
+  String _weight = '15';
   // final _price = TextEditingController();
   final _doc = TextEditingController();
   final _flashOnController = TextEditingController(text: "Flash on");
@@ -104,6 +109,35 @@ class _DocketWeightState extends State<DocketWeight> {
 
   List<BarcodeFormat> selectedFormats = [..._possibleFormats];
 
+  Future<void> getData() async {
+    int val = int.parse(_weight.toString());
+    print(val);
+    print(val.runtimeType);
+    try {
+      String url = "https://track.delhivery.com/api/p/edit";
+      final _body = {
+        "waybill": "6524810417620",
+        "gm": val, // _weight as int,
+        "name": "test",
+        "product_details": "t",
+        "add": "test para dummy pur",
+        "commodity_value": "120"
+      };
+      print(_body);
+      final _header = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "Authorization": "Token ea1e0ff0bf1e7de1f3104558a7d313e99db961c5",
+      };
+
+      final response =
+          await http.post(url, body: jsonEncode(_body), headers: _header);
+      print(response.body);
+    } catch (e) {
+      print(e);
+    }
+  }
+
   @override
   initState() {
     super.initState();
@@ -113,10 +147,11 @@ class _DocketWeightState extends State<DocketWeight> {
     });
   }
 
-  List<int> _phoneWidgets = [];
+  // List<int> _phoneWidgets = [];
   int finalsum = 0;
   int arrint;
   Future scan() async {
+    print(_weight);
     try {
       var options = ScanOptions(
         strings: {
@@ -179,8 +214,12 @@ class _DocketWeightState extends State<DocketWeight> {
                 Container(
                   padding: EdgeInsets.all(10),
                   child: TextFormField(
-                    // controller: _weight,
-                    initialValue: '200',
+                    initialValue: _weight,
+                    onChanged: (v) {
+                      setState(() {
+                        _weight = v;
+                      });
+                    },
                     keyboardType: TextInputType.number,
                     validator: (value) {
                       if (value.isEmpty) {
@@ -257,6 +296,12 @@ class _DocketWeightState extends State<DocketWeight> {
 
     return Container(
       child: Scaffold(
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            getData();
+          },
+          child: Icon(Icons.add),
+        ),
         appBar: AppBar(
           title: Text('Scanner'),
           centerTitle: true,

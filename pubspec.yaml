@@ -30,6 +30,7 @@ dependencies:
   firebase_core: ^0.4.5
   fluttertoast: ^7.1.6
   google_sign_in: ^4.4.4
+  http: ^0.12.2
   velocity_x: ^0.4.1
 
 dev_dependencies:

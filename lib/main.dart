@@ -1,11 +1,9 @@
 // import 'dart:io' show Platform;
 import 'dart:convert';
-import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:velocity_x/velocity_x.dart';
 import 'dart:async';
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:http/http.dart' as http;
@@ -36,14 +34,17 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TextField(
-              keyboardType: TextInputType.name,
-              controller: _nameController,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Name',
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: TextField(
+                keyboardType: TextInputType.name,
+                controller: _nameController,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Name',
+                ),
               ),
-            ).p(20),
+            ),
             FlatButton(
                 color: Colors.cyan,
                 onPressed: () {
@@ -92,7 +93,7 @@ class _DocketWeightState extends State<DocketWeight> {
   int _wVal = 4;
   ScanResult scanResult;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  String _weight = '15';
+  // String _weight = '216';
   // final _price = TextEditingController();
   final _doc = TextEditingController();
   final _flashOnController = TextEditingController(text: "Flash on");
@@ -108,31 +109,42 @@ class _DocketWeightState extends State<DocketWeight> {
     ..removeWhere((e) => e == BarcodeFormat.unknown);
 
   List<BarcodeFormat> selectedFormats = [..._possibleFormats];
-
-  Future<void> getData() async {
-    int val = int.parse(_weight.toString());
+  final _header = {
+    "Content-Type": "application/json",
+    "Accept": "application/json",
+    "Authorization": "Token ea1e0ff0bf1e7de1f3104558a7d313e99db961c5",
+  };
+  Future<void> editData() async {
+    int val = int.parse(_weightEditingController.text.toString());
     print(val);
     print(val.runtimeType);
     try {
       String url = "https://track.delhivery.com/api/p/edit";
       final _body = {
-        "waybill": "6524810417620",
+        "waybill": _waybill, //"6524810417620",
         "gm": val, // _weight as int,
-        "name": "test",
-        "product_details": "t",
-        "add": "test para dummy pur",
-        "commodity_value": "120"
+        "name": _name,
+        // "product_details": "t",
+        // "add": "test para dummy pur",
+        // "commodity_value": "120"
       };
       print(_body);
-      final _header = {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "Authorization": "Token ea1e0ff0bf1e7de1f3104558a7d313e99db961c5",
-      };
 
       final response =
           await http.post(url, body: jsonEncode(_body), headers: _header);
-      print(response.body);
+      // print(
+      var data = jsonDecode(response.body);
+      if (data['status'] == true) {
+        Fluttertoast.showToast(msg: "Updated ", backgroundColor: Colors.green);
+        setState(() {
+          _weightEditingController.text = '';
+        });
+        scan();
+      } else {
+        Fluttertoast.showToast(
+            msg: "Please scan again ", backgroundColor: Colors.red);
+      }
+      // );
     } catch (e) {
       print(e);
     }
@@ -151,7 +163,7 @@ class _DocketWeightState extends State<DocketWeight> {
   int finalsum = 0;
   int arrint;
   Future scan() async {
-    print(_weight);
+    print(_weightEditingController.text);
     try {
       var options = ScanOptions(
         strings: {
@@ -174,6 +186,7 @@ class _DocketWeightState extends State<DocketWeight> {
         rs = result.rawContent;
         scanResult = result;
       });
+      await getDataFromServer();
     } on PlatformException catch (e) {
       var result = ScanResult(
         type: ResultType.Error,
@@ -192,6 +205,31 @@ class _DocketWeightState extends State<DocketWeight> {
     }
   }
 
+  Future<void> getDataFromServer() async {
+    final url =
+        "https://track.delhivery.com/api/p/packing_slip?wbns=${scanResult.rawContent}";
+
+    final response = await http.get(url, headers: _header);
+    var data = jsonDecode(response.body);
+    if (data['packages_found'] == 0) {
+      Fluttertoast.showToast(
+          msg: "Please scan again ", backgroundColor: Colors.red);
+      scan();
+    } else {
+      print(data);
+      setState(() {
+        _waybill = data['packages'][0]['wbn'];
+        _name = data['packages'][0]['name'];
+        _weightEditingController.text =
+            data['packages'][0]['weight'].toString();
+      });
+      Fluttertoast.showToast(msg: "Scan next ", backgroundColor: Colors.green);
+    }
+    //weight
+  }
+
+  final _weightEditingController = TextEditingController();
+
   String rs;
   @override
   Widget build(BuildContext context) {
@@ -203,22 +241,18 @@ class _DocketWeightState extends State<DocketWeight> {
             child: Column(
               children: <Widget>[
                 ListTile(
-                  trailing: IconButton(
-                    icon: Icon(Icons.camera),
-                    tooltip: "Scan",
-                    onPressed: scan,
-                  ),
+                  trailing: Icon(Icons.camera),
                   title: Text("Docket No -"),
                   subtitle: Text(scanResult.rawContent ?? ""),
                 ),
                 Container(
                   padding: EdgeInsets.all(10),
                   child: TextFormField(
-                    initialValue: _weight,
+                    controller: _weightEditingController,
                     onChanged: (v) {
-                      setState(() {
-                        _weight = v;
-                      });
+                      // setState(() {
+                      //   _weight = v;
+                      // });
                     },
                     keyboardType: TextInputType.number,
                     validator: (value) {
@@ -235,7 +269,10 @@ class _DocketWeightState extends State<DocketWeight> {
                 ),
 
                 FlatButton(
-                  onPressed: scan
+                  onPressed: () async {
+                    await editData();
+                  }
+                  // onPressed: scan
                   // ()
                   // {
                   //   if (scanResult.rawContent.length == 13) {
@@ -296,12 +333,12 @@ class _DocketWeightState extends State<DocketWeight> {
 
     return Container(
       child: Scaffold(
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            getData();
-          },
-          child: Icon(Icons.add),
-        ),
+        // floatingActionButton: FloatingActionButton(
+        //   onPressed: () {
+        //     getData();
+        //   },
+        //   child: Icon(Icons.add),
+        // ),
         appBar: AppBar(
           title: Text('Scanner'),
           centerTitle: true,
